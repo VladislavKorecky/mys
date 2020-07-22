@@ -1,15 +1,26 @@
 import yaml
+import tkinter
+import graphics
 
 
 def loadStory():
     story = True
-    section = findSection(yamlReader("config.yml").get('start-id'))
+    section = findSection(yamlReader("config.yml").get("start-id"))
     variables = {}
     for x in yamlReader("variables.yml").get("variables"):
         variables[x] = None
     while story:
         if yamlReader("content.yml").get(section).get("if-enabled") is False:
             print(yamlReader("content.yml").get(section).get("text"))
+
+            if (yamlReader("config.yml").get("graphics")):
+                root = tkinter.Tk()
+                root.title(findSection(yamlReader("config.yml").get("story-name")))
+                img = graphics.loadImage(root, yamlReader("content.yml").get(section).get("image"))
+                tkinter.Label(root, image=img).pack()
+                root.mainloop()
+                root.destroy()
+            
             options = yamlReader("content.yml").get(section).get("options")
             if options is None:
                 exit()
