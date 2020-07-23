@@ -9,28 +9,33 @@ def loadStory():
     variables = {}
     for x in yamlReader("variables.yml").get("variables"):
         variables[x] = None
+    global root
+    if (yamlReader("config.yml").get("graphics")):
+        root = tkinter.Tk()
+        root.title(findSection(yamlReader("config.yml").get("story-name")))
+        #root.overrideredirect(True)
+        #root.geometry("{0}x{1}+0+0".format(root.winfo_screenwidth(), root.winfo_screenheight()))
     while story:
         if yamlReader("content.yml").get(section).get("if-enabled") is False:
-            print(yamlReader("content.yml").get(section).get("text"))
-
-            if (yamlReader("config.yml").get("graphics")):
-                root = tkinter.Tk()
-                root.title(findSection(yamlReader("config.yml").get("story-name")))
-                img = graphics.loadImage(root, yamlReader("content.yml").get(section).get("image"))
-                tkinter.Label(root, image=img).pack()
-                root.mainloop()
-                root.destroy()
-            
             options = yamlReader("content.yml").get(section).get("options")
+            if (yamlReader("config.yml").get("graphics")):
+                img = graphics.loadImage(root, yamlReader("content.yml").get(section).get("image"))
+                tkinter.Label(root, image=img).grid(row=0, column=round(len(options) / 2))
+            else:
+                print(yamlReader("content.yml").get(section).get("text"))
             if options is None:
                 exit()
             optionIndex = 0
             for x in options:
-                print(str(optionIndex + 1) + ". " + x[1])
+                if (yamlReader("config.yml").get("graphics")):
+                    tkinter.Button(root, text=x[1]).grid(row=1, column=optionIndex)
+                else:
+                    print(str(optionIndex + 1) + ". " + x[1])
                 optionIndex = optionIndex + 1
             userInput = input()
             optionIndex = int(userInput) - 1
-            variables[options[optionIndex][2][0]] = options[optionIndex][2][1]
+            if (options[optionIndex][2] != None):
+                variables[options[optionIndex][2][0]] = options[optionIndex][2][1]
             section = findSection(options[optionIndex][0])
         else:
             checker = 0
@@ -41,6 +46,7 @@ def loadStory():
                 section = findSection(yamlReader("content.yml").get(section).get("do"))
             else:
                 section = findSection(yamlReader("content.yml").get(section).get("else"))
+    root.mainloop()
 
 
 def yamlReader(file):
@@ -56,25 +62,3 @@ def findSection(sectionId):
     for x in data:
         if data.get(x).get("id") == sectionId:
             return x
-
-
-"""def loadFirstLine(lines):
-    print(firstLine[firstLine.index("(\"") + 2:firstLine.index("\")")])
-    loadSection(lines, lines[0])
-
-
-def loadSection(lines, key):
-    lines.pop(0)
-    for line in lines:
-        if key == line[0:line.index("(")]:
-            print(line[line.index("(\"") + 2:line.index("\")")])
-            options = line[line.index("-") + 1:len(line)].split(",")
-            if options[0] == "!end":
-                exit()
-            optionNumber = 1
-            for option in options:
-                print(str(optionNumber) + ". " + option[option.index("(\"") + 2:option.index("\")")])
-                optionNumber += 1
-            usersOption = input()
-            usersOption = int(usersOption) - 1
-            loadSection(lines, options[usersOption][0:options[usersOption].index("(")])"""
